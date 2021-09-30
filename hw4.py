@@ -29,7 +29,7 @@ class Customer:
     # it deducts the amount from the customer’s wallet and calls the receive_payment method on the cashier object
     def submit_order(self, cashier, stall, amount): 
         self.wallet -= amount
-        self.receive_payment(cashier, stall, amount)
+        Cashier.receive_payment(cashier, stall, amount)
 
 
     # The __str__ method prints the customer's information.    
@@ -85,7 +85,7 @@ class Stall:
             self.inventory[food_name] -= quantity
 
     def has_item(self, food_name, quantity):
-        if self.inventory[food_name] > quantity:
+        if food_name in self.inventory.keys() and self.inventory[food_name] > quantity:
             return True
         else:
             return False 
@@ -97,112 +97,114 @@ class Stall:
             self.inventory[food_name] = quantity 
 
     def compute_cost(self, quantity):
-        return (quantity)(self.cost) 
+        return (int(self.cost)*int(quantity))
     
     def __str__(self):
         return "Hello, we are " + str(self.name) + '. ' + "This is the current menu" + str(self.inventory)
 
 
-# class TestAllMethods(unittest.TestCase):
+class TestAllMethods(unittest.TestCase):
     
-#     def setUp(self):
-#         inventory = {"Burger":40, "Taco":50}
-#         self.f1 = Customer("Ted")
-#         self.f2 = Customer("Morgan", 150)
-#         self.s1 = Stall("The Grill Queen", inventory, cost = 10)
-#         self.s2 = Stall("Tamale Train", inventory, cost = 9)
-#         self.s3 = Stall("The Streatery", inventory)
-#         self.c1 = Cashier("West")
-#         self.c2 = Cashier("East")
-#         #the following codes show that the two cashiers have the same directory
-#         for c in [self.c1, self.c2]:
-#             for s in [self.s1,self.s2,self.s3]:
-#                 c.add_stall(s)
+    def setUp(self):
+        inventory = {"Burger":40, "Taco":50}
+        self.f1 = Customer("Ted")
+        self.f2 = Customer("Morgan", 150)
+        self.s1 = Stall("The Grill Queen", inventory, cost = 10)
+        self.s2 = Stall("Tamale Train", inventory, cost = 9)
+        self.s3 = Stall("The Streatery", inventory)
+        self.c1 = Cashier("West")
+        self.c2 = Cashier("East")
+        #the following codes show that the two cashiers have the same directory
+        for c in [self.c1, self.c2]:
+            for s in [self.s1,self.s2,self.s3]:
+                c.add_stall(s)
 
-# 	## Check to see whether constructors work
-#     def test_customer_constructor(self):
-#         self.assertEqual(self.f1.name, "Ted")
-#         self.assertEqual(self.f2.name, "Morgan")
-#         self.assertEqual(self.f1.wallet, 100)
-#         self.assertEqual(self.f2.wallet, 150)
+	## Check to see whether constructors work
+    def test_customer_constructor(self):
+        self.assertEqual(self.f1.name, "Ted")
+        self.assertEqual(self.f2.name, "Morgan")
+        self.assertEqual(self.f1.wallet, 100)
+        self.assertEqual(self.f2.wallet, 150)
 
-# 	## Check to see whether constructors work
-#     def test_cashier_constructor(self):
-#         self.assertEqual(self.c1.name, "West")
-#         #cashier holds the directory - within the directory there are three stalls
-#         self.assertEqual(len(self.c1.directory), 3) 
+	## Check to see whether constructors work
+    def test_cashier_constructor(self):
+        self.assertEqual(self.c1.name, "West")
+        #cashier holds the directory - within the directory there are three stalls
+        self.assertEqual(len(self.c1.directory), 3) 
 
-# 	## Check to see whether constructors work
-#     def test_truck_constructor(self):
-#         self.assertEqual(self.s1.name, "The Grill Queen")
-#         self.assertEqual(self.s1.inventory, {"Burger":40, "Taco":50})
-#         self.assertEqual(self.s3.earnings, 0)
-#         self.assertEqual(self.s2.cost, 9)
+	## Check to see whether constructors work
+    def test_truck_constructor(self):
+        self.assertEqual(self.s1.name, "The Grill Queen")
+        self.assertEqual(self.s1.inventory, {"Burger":40, "Taco":50})
+        self.assertEqual(self.s3.earnings, 0)
+        self.assertEqual(self.s2.cost, 9)
 
-# 	# Check that the stall can stock up properly.
-#     def test_stocking(self):
-#         inventory = {"Burger": 10}
-#         s4 = Stall("Misc Stall", inventory)
+	# Check that the stall can stock up properly.
+    def test_stocking(self):
+        inventory = {"Burger": 10}
+        s4 = Stall("Misc Stall", inventory)
 
-# 		# Testing whether stall can stock up on items
-#         self.assertEqual(s4.inventory, {"Burger": 10})
-#         s4.stock_up("Burger", 30)
-#         self.assertEqual(s4.inventory, {"Burger": 40})
+		# Testing whether stall can stock up on items
+        self.assertEqual(s4.inventory, {"Burger": 10})
+        s4.stock_up("Burger", 30)
+        self.assertEqual(s4.inventory, {"Burger": 40})
         
-#     def test_make_payment(self):
-# 		# Check to see how much money there is prior to a payment
-#         previous_custormer_wallet = self.f2.wallet
-#         previous_earnings_stall = self.s2.earnings
+    def test_make_payment(self):
+		# Check to see how much money there is prior to a payment
+        previous_custormer_wallet = self.f2.wallet
+        previous_earnings_stall = self.s2.earnings
         
-#         self.f2.submit_order(self.c1, self.s2, 30)
+        self.f2.submit_order(self.c1, self.s2, 30)
 
-# 		# See if money has changed hands
-#         self.assertEqual(self.f2.wallet, previous_custormer_wallet - 30)
-#         self.assertEqual(self.s2.earnings, previous_earnings_stall + 30)
-
-
-# 	# Check to see that the server can serve from the different stalls
-#     def test_adding_and_serving_stall(self):
-#         c3 = Cashier("North", directory = [self.s1, self.s2])
-#         self.assertTrue(c3.has_stall(self.s1))
-#         self.assertFalse(c3.has_stall(self.s3)) 
-#         c3.add_stall(self.s3)
-#         self.assertTrue(c3.has_stall(self.s3))
-#         self.assertEqual(len(c3.directory), 3)
+		# See if money has changed hands
+        self.assertEqual(self.f2.wallet, previous_custormer_wallet - 30)
+        self.assertEqual(self.s2.earnings, previous_earnings_stall + 30)
 
 
-# 	# Test that computed cost works properly.
-#     def test_compute_cost(self):
-#         #what's wrong with the following statements?
-#         #can you correct them?
-#         self.assertEqual(self.s1.compute_cost(self.s1,5), 51)
-#         self.assertEqual(self.s3.compute_cost(self.s3,6), 45)
+	# Check to see that the server can serve from the different stalls
+    def test_adding_and_serving_stall(self):
+        c3 = Cashier("North", directory = [self.s1, self.s2])
+        self.assertTrue(c3.has_stall(self.s1))
+        self.assertFalse(c3.has_stall(self.s3)) 
+        c3.add_stall(self.s3)
+        self.assertTrue(c3.has_stall(self.s3))
+        self.assertEqual(len(c3.directory), 3)
 
-# 	# Check that the stall can properly see when it is empty
-#     def test_has_item(self):
-#         # Set up to run test cases
 
-#         # Test to see if has_item returns True when a stall has enough items left
-#         # Please follow the instructions below to create three different kinds of test cases 
-#         # Test case 1: the stall does not have this food item: 
+	# Test that computed cost works properly.
+    def test_compute_cost(self):
+        #what's wrong with the following statements?
+        #can you correct them?
+        self.assertEqual(self.s1.compute_cost(5), 50)
+        self.assertEqual(self.s3.compute_cost(6), 42)
+
+	# Check that the stall can properly see when it is empty
+    def test_has_item(self):
+        # Set up to run test cases
+        self.assertEqual(self.s1.has_item("Nachos", 10), False)
+        self.assertEqual(self.s1.has_item("Burger", 60), False)
+        self.assertEqual(self.s1.has_item("Taco", 40), True)
+
+        # Test to see if has_item returns True when a stall has enough items left
+        # Please follow the instructions below to create three different kinds of test cases 
+        # Test case 1: the stall does not have this food item: 
         
-#         # Test case 2: the stall does not have enough food item: 
+        # Test case 2: the stall does not have enough food item: 
         
-#         # Test case 3: the stall has the food item of the certain quantity: 
-#         pass
+        # Test case 3: the stall has the food item of the certain quantity: 
 
-# 	# Test validate order
-#     def test_validate_order(self):
-# 		# case 1: test if a customer doesn't have enough money in their wallet to order
+	# Test validate order
+    def test_validate_order(self):
+		# case 1: test if a customer doesn't have enough money in their wallet to order
 
-# 		# case 2: test if the stall doesn't have enough food left in stock
+		# case 2: test if the stall doesn't have enough food left in stock
 
-# 		# case 3: check if the cashier can order item from that stall
-#         pass
+		# case 3: check if the cashier can order item from that stall
+        pass
 
-#     # Test if a customer can add money to their wallet
-#     def test_reload_money(self):
-#         pass
+    # Test if a customer can add money to their wallet
+    def test_reload_money(self):
+        pass
     
 ### Write main function
 def main():
@@ -217,14 +219,8 @@ def main():
     s1 = Stall("Chipotle", inventory_1, cost=10)
     s2 = Stall("McDonalds", inventory_2, cost=5)
 
-    ca1 = Cashier("Mark", directory = ["Chipotle", "McDonalds"])
-    ca2 = Cashier("Steve", directory = ["McDonalds", "Pizza Hut"])
-
-    print("-----")
-
-    ca1.has_stall("Chipotle")
-
-    print("-----")    
+    ca1 = Cashier("Mark", ["Chipotle", "McDonalds"])
+    ca2 = Cashier("Steve", ["McDonalds", "Pizza Hut"]) 
 
     c1.validate_order(ca2, s1, "Pizza", 10)
     c2.validate_order(ca1, s2, "Chips Bags", 10)
@@ -245,6 +241,6 @@ def main():
     pass
 
 if __name__ == "__main__":
-	main()
+	# main()
 	print("\n")
 	unittest.main(verbosity = 2)
