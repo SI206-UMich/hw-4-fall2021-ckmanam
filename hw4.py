@@ -1,9 +1,11 @@
 
 import unittest
+import random
 
 # The Customer class
 # The Customer class represents a customer who will order from the stalls.
 class Customer: 
+    
     # Constructor
     def __init__(self, name, wallet = 100):
         self.name = name
@@ -28,6 +30,7 @@ class Customer:
     
     # Submit_order takes a cashier, a stall and an amount as parameters, 
     # it deducts the amount from the customer’s wallet and calls the receive_payment method on the cashier object
+
     def submit_order(self, cashier, stall, amount): 
         self.wallet -= amount
         Cashier.receive_payment(cashier, stall, amount)
@@ -46,6 +49,7 @@ class Cashier:
     def __init__(self, name, directory =[]):
         self.name = name
         self.directory = directory[:] # make a copy of the directory
+        self.n = 0
 
     # Whether the stall is in the cashier's directory
     def has_stall(self, stall):
@@ -63,9 +67,17 @@ class Cashier:
 	# The cashier pays the stall the cost.
 	# The stall processes the order
 	# Function returns cost of the order, using compute_cost method
+
     def place_order(self, stall, item, quantity):
         stall.process_order(item, quantity)
         return stall.compute_cost(quantity) 
+        self.n += 1 
+        if self.n % 10:
+            int = random.randint(1, 100)
+            if int >= 1 and int <= 5:
+                Customer.wallet += 10 
+        
+    
     
     # string function.
     def __str__(self):
@@ -231,10 +243,6 @@ def main():
 
     s1 = Stall("Chipotle", inventory_1, cost=10)
     s2 = Stall("McDonalds", inventory_2, cost=5)
-
-    print("----------")
-    print(s1)
-    print("----------")
 
     ca1 = Cashier("Mark", [s1, s2])
     ca2 = Cashier("Steve", [s2]) 
